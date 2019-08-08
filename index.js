@@ -10,6 +10,7 @@ const makeCall = methods.makeCall;
 const placeCall = methods.placeCall;
 const incoming = methods.incoming;
 const welcome = methods.welcome;
+const say = methods.say;
 var twilio = require('twilio');
 
 // Create Express webapp
@@ -19,11 +20,11 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', function(request, response) {
-  response.send(welcome());
+  response.send(welcome(request));
 });
 
 app.post('/', function(request, response) {
-  response.send(welcome());
+  response.send(welcome(request));
 });
 
 app.get('/accessToken', function(request, response) {
@@ -47,11 +48,15 @@ app.get('/placeCall', placeCall);
 app.post('/placeCall', placeCall);
 
 app.get('/incoming', function(request, response) {
-  response.send(incoming());
+  response.send(incoming(request, response));
 });
 
 app.post('/incoming', function(request, response) {
-  response.send(incoming());
+  response.send(incoming(request, response));
+});
+
+app.post('/say', function(request, response) {
+  response.send(say(request, response));
 });
 
 // Create an http server and run it

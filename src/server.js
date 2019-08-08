@@ -105,8 +105,10 @@ async function placeCall(request, response) {
     to = request.query.to;
   }
   console.log(to);
-  // The fully qualified URL that should be consulted by Twilio when the call connects.
-  var url = request.protocol + '://' + request.get('host') + '/incoming';
+  // The fully qualified URL that should be consuted by Twilio when the call connects.
+  // var url = "https://handler.twilio.com/twiml/EH5bafa514c8ca86750e533aa1d4217a95?Name=Ing&customValue=true";
+  var baseUrl = request.protocol + '://' + request.get('host');
+  var url = baseUrl + '/incoming';
   console.log(url);
   const accountSid = process.env.ACCOUNT_SID;
   const apiKey = process.env.API_KEY;
@@ -119,6 +121,9 @@ async function placeCall(request, response) {
       url: url,
       to: 'client:' + defaultIdentity,
       from: callerId,
+      statusCallback: baseUrl,
+      statusCallbackEvent: ['initiated'],
+      statusCallbackMethod: 'POST',
     });
   } else if (isNumber(to)) {
     console.log("Calling number:" + to);
@@ -143,16 +148,34 @@ async function placeCall(request, response) {
 /**
  * Creates an endpoint that plays back a greeting.
  */
-function incoming() {
+function incoming(request, response) {
+  console.log('Request', request.body);
+  const voiceResponse = new VoiceResponse();
+  //voiceResponse.say("Congratulations! You have received your first inbound call! Good bye.");
+  console.log('Response:' + voiceResponse.toString());
+  return voiceResponse.toString();
+}
+
+function say(request, response) {
+  console.log('Request', request.body);
   const voiceResponse = new VoiceResponse();
   voiceResponse.say("Congratulations! You have received your first inbound call! Good bye.");
   console.log('Response:' + voiceResponse.toString());
   return voiceResponse.toString();
 }
 
-function welcome() {
+function welcome(request) {
+  /*
   const voiceResponse = new VoiceResponse();
   voiceResponse.say("Welcome to Twilio");
+  console.log('Response:' + voiceResponse.toString());
+  return voiceResponse.toString();*/
+  console.log('Request', request.body);
+  const voiceResponse = new VoiceResponse();
+  const dial = voiceResponse.dial({ callerId: callerId });
+  const client = dial.client()
+  client.identity({}, "alice");
+  client.parameter({ name: "ramdom", value: "ingaling" });
   console.log('Response:' + voiceResponse.toString());
   return voiceResponse.toString();
 }
@@ -184,3 +207,4 @@ exports.makeCall = makeCall;
 exports.placeCall = placeCall;
 exports.incoming = incoming;
 exports.welcome = welcome;
+exports.say = say;
